@@ -54,7 +54,7 @@ private:
 void FonaModule::setup()
 {
     initializeFona();
-    deleteAllSMS();
+   // deleteAllSMS();
 }
 
 void FonaModule::initializeFona()
@@ -74,6 +74,7 @@ void FonaModule::initializeFona()
       Serial.println(F("Couldn't find FONA"));
       while(1);
     }
+    
     Serial.println(F("FONA is OK"));
     
     // Print SIM card IMEI number.
@@ -139,7 +140,7 @@ void FonaModule::deleteAllSMS()
               Serial.println(F("Deleted Message"));
             } else {
               Serial.println(F("Couldn't delete"));
-              deleteAllSMS();
+              //deleteAllSMS();
             }
           }
      }

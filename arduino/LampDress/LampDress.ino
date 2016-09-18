@@ -31,30 +31,36 @@
 #include "FonaModule.h"
 #include "LedsManager.h"
 #include "ReceiveHandler.h"
+#include "TimerManager.h"
 
 
 FonaModule fonaModule;
 LedsManager leds;
 ReceiveHandler receiver(&leds);
+TimerManager timer(&leds);
 
 
 void setup() {
 
   fonaModule.setup();
- // leds.setup();
-  //receiver.setup();
+  leds.setup();
+  receiver.setup();
+  timer.setup();
   
 }
 
 
 void loop() {
 
-  //leds.update();
-  
+  leds.update();
   fonaModule.update();
     
-  //if(fonaModule.isNewMessage()){
-    //  receiver.parseMessage(fonaModule.getCurrentMessage());
-  //}
+  if(fonaModule.isNewMessage()){
+      timer.reset();
+      Serial.print("NEW MESSAGE RECEIVED: "); Serial.println(fonaModule.getCurrentMessage());
+      receiver.parseMessage(fonaModule.getCurrentMessage());   
+  }
+
+  timer.update();
 
 }

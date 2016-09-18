@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////
-// A set of functions, types and buffers used for LED control.
+// Class controlling the leds and its effects
+//
+// Most of th eanimations were based on Mark Kriegsman's demo reel, December 2014
 //
 // This code is under A Creative Commons Attribution/Share-Alike License
 // http://creativecommons.org/licenses/by-sa/4.0/
@@ -13,15 +15,6 @@
 
 FASTLED_USING_NAMESPACE
 
-// FastLED "100-lines-of-code" demo reel, showing just a few 
-// of the kinds of animation patterns you can quickly and easily 
-// compose using FastLED.  
-//
-// This example also shows one easy way to define multiple 
-// animations patterns and have them automatically rotate.
-//
-// -Mark Kriegsman, December 2014
-
 #if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
 #warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
@@ -34,7 +27,7 @@ FASTLED_USING_NAMESPACE
 #define DATA_PIN 10
 #define CLOCK_PIN 11
 #define FRAMES_PER_SECOND  120
-#define NUM_PATTERNS  6
+#define NUM_PATTERNS  10
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -45,7 +38,11 @@ enum LED_PATTERNS {
   CONFETTI,
   SINELON,
   JUGGLE,
-  BPM
+  BPM,
+  SOLID,
+  SOLID_GLITTER,
+  FADE,
+  FLASH
 };
 
 
@@ -76,11 +73,18 @@ class LedsManager{
     void bpm();
     void juggle();
     void runPattern();
+    void solid();
+    void solidWithGlitter();
+    void fade();
+    void flash();
     
     CRGB leds[NUM_LEDS]; // Define the array of leds
     uint8_t gCurrentPatternNumber; // Index number of which pattern is current
     uint8_t gHue; // rotating "base color" used by many of the patterns
     CRGB    gColor;
+
+    int fadeAmount;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
+    int fadeBrightness;
 
 };
 
@@ -89,13 +93,15 @@ void LedsManager::setup()
     delay(3000); // 3 second delay for recovery
   
     FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5,2100); 
     FastLED.setBrightness(  BRIGHTNESS );
     FastLED.show();
 
     gCurrentPatternNumber = 0; 
     gHue = 0; 
 
-    
+    fadeAmount = 5;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
+    fadeBrightness = 0;
 }
 
 void LedsManager::update()
@@ -140,6 +146,18 @@ void LedsManager::runPattern()
         case BPM:
           bpm();
           break;
+        case SOLID:
+          solid();
+          break;
+        case SOLID_GLITTER:
+          solidWithGlitter();
+          break;
+        case FADE:
+          fade();
+          break;
+        case FLASH:
+          fade();
+          break;
           
         default: 
           // if nothing else matches, do the default
@@ -159,6 +177,20 @@ void LedsManager::nextPattern()
   gCurrentPatternNumber = (gCurrentPatternNumber + 1) % NUM_PATTERNS;
 }
 
+void LedsManager::solid()
+{
+   fill_solid(leds, NUM_LEDS, gColor);  
+}
+
+
+void LedsManager::solidWithGlitter()
+{
+   solid();
+   addGlitter(80);
+}
+
+
+ 
 void LedsManager::rainbow() 
 {
   // FastLED's built-in rainbow generator
@@ -195,6 +227,38 @@ void LedsManager::sinelon()
   leds[pos] += gColor;
 }
 
+void LedsManager::fade()
+{
+   fadeAmount = 5;
+   for(int i = 0; i < NUM_LEDS; i++ )
+   {
+     leds[i].fadeLightBy(fadeBrightness);
+   }
+
+   fadeBrightness = fadeBrightness + fadeAmount;
+  // reverse the direction of the fading at the ends of the fade:
+  if(fadeBrightness <= 0 || fadeBrightness >= 255)
+  {
+    fadeAmount = -fadeAmount ;
+  }   
+}
+
+void LedsManager::flash()
+{
+   fadeAmount = 50;
+   for(int i = 0; i < NUM_LEDS; i++ )
+   {
+     leds[i].fadeLightBy(fadeBrightness);
+   }
+
+   fadeBrightness = fadeBrightness + fadeAmount;
+  // reverse the direction of the fading at the ends of the fade:
+  if(fadeBrightness <= 0 || fadeBrightness >= 255)
+  {
+    fadeAmount = -fadeAmount ;
+  }   
+}
+
 void LedsManager::bpm()
 {
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
@@ -209,9 +273,7 @@ void LedsManager::bpm()
 void LedsManager::juggle() {
   // eight colored dots, weaving in and out of sync with each other
   fadeToBlackBy( leds, NUM_LEDS, 20);
-  byte dothue = 0;
   for( int i = 0; i < 8; i++) {
     leds[beatsin16(i+7,0,NUM_LEDS)] |= gColor;
-    dothue += 32;
   }
 }
