@@ -41,20 +41,20 @@ ReceiveHandler receiver(&leds);
 void setup() {
 
   fonaModule.setup();
-  leds.setup();
-  receiver.setup();
+ // leds.setup();
+  //receiver.setup();
   
 }
 
 
 void loop() {
 
-  leds.update();
+  //leds.update();
   
   fonaModule.update();
     
-  if(fonaModule.isNewMessage()){
-      receiver.parseMessage(fonaModule.getCurrentMessage());
-  }
+  //if(fonaModule.isNewMessage()){
+    //  receiver.parseMessage(fonaModule.getCurrentMessage());
+  //}
 
 }

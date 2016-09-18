@@ -21,9 +21,6 @@
 #define FONA_RST 4
 #define FONA_RI  7
 
-SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
-SoftwareSerial *fonaSerial   = &fonaSS;
-Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
 
 class FonaModule{
@@ -41,10 +38,13 @@ public:
 
   char fonaInBuffer[64];
   char smsbuffer[255];  // this is a large buffer for sms
+
+  SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
+ SoftwareSerial *fonaSerial   = &fonaSS;
   
 private:
 
-    //Adafruit_FONA* fona;  //Class controlling the GSM module
+    Adafruit_FONA* fona;  //Class controlling the GSM module
     bool newMessage;
     String currentMessage;
     
@@ -54,12 +54,13 @@ private:
 void FonaModule::setup()
 {
     initializeFona();
-    //deleteAllSMS();
+    deleteAllSMS();
 }
 
 void FonaModule::initializeFona()
 {
-    //fona = new Adafruit_FONA(FONA_RST);
+    fona = new Adafruit_FONA(FONA_RST);
+ 
   
     while (!Serial);
   
@@ -69,7 +70,7 @@ void FonaModule::initializeFona()
     
     // make it slow so its easy to read!
     fonaSerial->begin(4800);
-    if (! fona.begin(*fonaSerial)) {
+    if (! fona->begin(*fonaSerial)) {
       Serial.println(F("Couldn't find FONA"));
       while(1);
     }
@@ -77,7 +78,7 @@ void FonaModule::initializeFona()
     
     // Print SIM card IMEI number.
     char imei[15] = {0}; // MUST use a 16 character buffer for IMEI!
-    uint8_t imeiLen = fona.getIMEI(imei);
+    uint8_t imeiLen = fona->getIMEI(imei);
     if (imeiLen > 0) {
       Serial.print("SIM card IMEI: "); Serial.println(imei);
     }
@@ -87,29 +88,31 @@ void FonaModule::initializeFona()
 
 void FonaModule::deleteAllSMS()
 {
-    int8_t num = fona.getNumSMS();
+    int8_t num = fona->getNumSMS();
     for(int8_t i = 0; i < num; i++)
     {
-        fona.deleteSMS(i);
+        fona->deleteSMS(i);
     }
 }
  void FonaModule::update()
  {
      newMessage = false;
-     char* bufPtr = fonaInBuffer;    //handy buffer pointer
-     
-     if (fona.available())      //any data available from the FONA?
+   
+     if (fona->available())      //any data available from the FONA?
      {
         // this is a large buffer for sms
+       
+          char* bufPtr = fonaInBuffer;    //handy buffer pointer
+
           int slot = 0;            //this will be the slot number of the SMS
           int charCount = 0;
           //Read the notification into fonaInBuffer
            do  
            {
-              *bufPtr = fona.read();
+              *bufPtr = fona->read();
               Serial.write(*bufPtr);
               delay(1);
-            } while ((*bufPtr++ != '\n') && (fona.available()) && (++charCount < (sizeof(fonaInBuffer)-1)));
+            } while ((*bufPtr++ != '\n') && (fona->available()) && (++charCount < (sizeof(fonaInBuffer)-1)));
     
           //Add a terminal NULL to the notification string
            *bufPtr = 0;
@@ -120,7 +123,7 @@ void FonaModule::deleteAllSMS()
          {
              // Retrieve SMS value.
               uint16_t smslen;
-            if (! fona.readSMS(slot, smsbuffer, 250, &smslen)) { // pass in buffer and max len!
+            if (! fona->readSMS(slot, smsbuffer, 250, &smslen)) { // pass in buffer and max len!
               Serial.println("Failed!");
             }
             else{
@@ -132,11 +135,11 @@ void FonaModule::deleteAllSMS()
               currentMessage = String(smsbuffer);
             }
       
-            if (fona.deleteSMS(slot)) { // delete the original msg after it is processed, otherwise
-              Serial.println(F("OK!"));
+            if (fona->deleteSMS(slot)) { // delete the original msg after it is processed, otherwise
+              Serial.println(F("Deleted Message"));
             } else {
               Serial.println(F("Couldn't delete"));
-              //deleteAllSMS();
+              deleteAllSMS();
             }
           }
      }
