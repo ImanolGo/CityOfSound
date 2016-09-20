@@ -42,6 +42,10 @@ TimerManager timer(&leds);
 
 void setup() {
 
+  //while (!Serial); //It get's stuck if not connected to a computer
+  
+  Serial.begin(115200);
+    
   leds.setup();
   fonaModule.setup();
   receiver.setup();

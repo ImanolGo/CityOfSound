@@ -104,8 +104,8 @@ void LedsManager::setup()
     //FastLED.setBrightness(  BRIGHTNESS );
   
 
-    gCurrentPatternNumber = SOLID; 
-    gColor = CRGB::Black;
+    gCurrentPatternNumber = RAINBOW; 
+    gColor = CRGB::NavajoWhite;
     gHue = 0; 
 
     fadeAmount = 1;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.

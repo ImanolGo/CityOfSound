@@ -9,6 +9,7 @@
 #pragma once
 #include "Arduino.h"
 #include "LedsManager.h"
+#include "Utils.h"
 
 class ReceiveHandler{
 private:
@@ -38,6 +39,9 @@ void ReceiveHandler::parseMessage(String message)
   String scondString = message.substring(hashTagIndex+1, secondHashTagIndex);
   String thirdString = message.substring(secondHashTagIndex+1); // To the end of the string
 
+  scondString = utf8ascii(scondString);
+  thirdString = utf8ascii(thirdString);
+
   setCommands(scondString, thirdString);
   
 }
@@ -56,7 +60,7 @@ void ReceiveHandler::setCommands(const String& color, const String& pattern)
 void ReceiveHandler::setColor(const String& color)
 {
 
-      if(color == "green" || color == "Green" || color == "Grün" || color == "grün" || color == "GRÜN"){
+      if(color == "green" || color == "Green" || color == "Grn" || color == "grn" || color == "GRN"){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::DarkGreen);
       }
@@ -68,7 +72,7 @@ void ReceiveHandler::setColor(const String& color)
 
       else if(color == "blue" || color == "Blue"  || color == "Blau" || color == "blau" || color == "BLAU"){
         Serial.print("Set Color: "); Serial.println(color);
-        this->ledsManager->setColor(CRGB::DodgerBlue);
+        this->ledsManager->setColor(CRGB::DeepSkyBlue);
       }
 
       else if(color == "yellow" || color == "Yellow"  || color == "Gelb" || color == "gelb" || color == "GELB"){
@@ -96,9 +100,9 @@ void ReceiveHandler::setColor(const String& color)
         this->ledsManager->setColor(CRGB::DeepPink);
       }
 
-       else if(color == "white" || color == "White" || color == "weiß"  || color == "Weiß" || color == "WEIß"){
+       else if(color == "white" || color == "White" || color == "wei"  || color == "Wei" || color == "WEI"){
         Serial.print("Set Pattern: "); Serial.println(color);
-        this->ledsManager->setColor(CRGB::White);
+        this->ledsManager->setColor(CRGB::NavajoWhite);
       }
 
 
