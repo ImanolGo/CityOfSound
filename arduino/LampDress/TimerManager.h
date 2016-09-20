@@ -55,9 +55,9 @@ void TimerManager::update()
     
     if (elapsedTime > INTERVAL) 
     {   
+        Serial.print("Reset to default");
         this->reset();
-        this->ledsManager->setColor(CRGB::NavajoWhite);
-        this->ledsManager->setPattern(FADE);
+        this->ledsManager->setDefaultState();
     }
 }
 

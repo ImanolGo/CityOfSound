@@ -20,29 +20,30 @@ FASTLED_USING_NAMESPACE
 #endif
 
 
-#define NUM_LEDS    25
+#define NUM_LEDS    50
 #define BRIGHTNESS  84
 #define LED_TYPE    WS2801
 #define COLOR_ORDER RGB
-#define DATA_PIN 10
-#define CLOCK_PIN 11
+#define DATA_PIN 11
+#define CLOCK_PIN 10
 #define FRAMES_PER_SECOND  120
-#define NUM_PATTERNS  10
+#define NUM_PATTERNS  4
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 
 enum LED_PATTERNS {
+  SOLID_GLITTER,
+  JUGGLE,
+  FADE,
+  FLASH,
   RAINBOW,
   RAINBOW_GLITTER,
   CONFETTI,
   SINELON,
-  JUGGLE,
   BPM,
   SOLID,
-  SOLID_GLITTER,
-  FADE,
-  FLASH
+  SLOW_JUGGLE
 };
 
 
@@ -58,6 +59,7 @@ class LedsManager{
     void setColor(CRGB  color) {gColor = color;}
     void setPattern(uint8_t patternNumber );
     void nextPattern();
+    void setDefaultState();
 
   private:
 
@@ -72,36 +74,57 @@ class LedsManager{
     void sinelon();
     void bpm();
     void juggle();
+    void slow_juggle();
     void runPattern();
     void solid();
     void solidWithGlitter();
     void fade();
     void flash();
+    void rainbowCycle() ;
+    byte * Wheel(byte WheelPos);
     
     CRGB leds[NUM_LEDS]; // Define the array of leds
     uint8_t gCurrentPatternNumber; // Index number of which pattern is current
     uint8_t gHue; // rotating "base color" used by many of the patterns
     CRGB    gColor;
 
-    int fadeAmount;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
-    int fadeBrightness;
+    uint8_t fadeAmount;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
+    uint8_t flashAmount;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
+    uint8_t fadeBrightness;
+    float cycleIndex;
 
 };
 
 void LedsManager::setup()
 {
-    delay(3000); // 3 second delay for recovery
+    delay(1000); // 3 second delay for recovery
   
     FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(5,2100); 
-    FastLED.setBrightness(  BRIGHTNESS );
-    FastLED.show();
+    //FastLED.setBrightness(  BRIGHTNESS );
+  
 
-    gCurrentPatternNumber = 0; 
+    gCurrentPatternNumber = SOLID; 
+    gColor = CRGB::Black;
     gHue = 0; 
 
-    fadeAmount = 5;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
-    fadeBrightness = 0;
+    fadeAmount = 1;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
+    flashAmount = 16; 
+    fadeBrightness =0;
+    cycleIndex = 0;
+
+    for(int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = CRGB::White;
+     }
+    FastLED.show();
+
+    delay(1500); // 3 second delay for recovery
+    for(int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = CRGB::Black;
+     }
+    FastLED.show();
+    
+    this->setDefaultState();
 }
 
 void LedsManager::update()
@@ -123,6 +146,11 @@ void LedsManager::update()
 }
 
 
+void LedsManager::setDefaultState()
+{
+    //setColor(CRGB::SandyBrown);
+    setPattern(RAINBOW);
+}
 void LedsManager::runPattern()
 {
 
@@ -156,7 +184,10 @@ void LedsManager::runPattern()
           fade();
           break;
         case FLASH:
-          fade();
+          flash();
+          break;
+        case SLOW_JUGGLE:
+          slow_juggle();
           break;
           
         default: 
@@ -194,7 +225,9 @@ void LedsManager::solidWithGlitter()
 void LedsManager::rainbow() 
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 7);
+  //fill_rainbow( leds, NUM_LEDS, gHue, 7);
+
+  rainbowCycle();
 }
 
 void LedsManager::rainbowWithGlitter() 
@@ -229,34 +262,25 @@ void LedsManager::sinelon()
 
 void LedsManager::fade()
 {
-   fadeAmount = 5;
+   uint16_t bpm = 10; 
    for(int i = 0; i < NUM_LEDS; i++ )
    {
-     leds[i].fadeLightBy(fadeBrightness);
+     leds[i] = gColor;
+     leds[i].fadeLightBy(beatsin16(bpm,0,255));
    }
-
-   fadeBrightness = fadeBrightness + fadeAmount;
-  // reverse the direction of the fading at the ends of the fade:
-  if(fadeBrightness <= 0 || fadeBrightness >= 255)
-  {
-    fadeAmount = -fadeAmount ;
-  }   
+    
 }
 
 void LedsManager::flash()
 {
-   fadeAmount = 50;
+   uint16_t bpm = 240;
+   
    for(int i = 0; i < NUM_LEDS; i++ )
    {
-     leds[i].fadeLightBy(fadeBrightness);
+     leds[i] = gColor;
+    // CRGB color = CHSV( colorHSV.hue, colorHSV.saturation, beat16(bpm));
+     leds[i].fadeLightBy(beat16(bpm));
    }
-
-   fadeBrightness = fadeBrightness + fadeAmount;
-  // reverse the direction of the fading at the ends of the fade:
-  if(fadeBrightness <= 0 || fadeBrightness >= 255)
-  {
-    fadeAmount = -fadeAmount ;
-  }   
 }
 
 void LedsManager::bpm()
@@ -270,10 +294,65 @@ void LedsManager::bpm()
   }
 }
 
-void LedsManager::juggle() {
+void LedsManager::juggle() 
+{
   // eight colored dots, weaving in and out of sync with each other
   fadeToBlackBy( leds, NUM_LEDS, 20);
   for( int i = 0; i < 8; i++) {
     leds[beatsin16(i+7,0,NUM_LEDS)] |= gColor;
   }
 }
+
+void LedsManager::slow_juggle() 
+{
+   for(int i = 0; i < NUM_LEDS; i++ )
+   {
+     leds[i] = gColor;
+     leds[i].fadeLightBy(beatsin16(10,0,255));
+   }
+   
+}
+
+
+
+ 
+void LedsManager::rainbowCycle() 
+{
+  byte *c;
+  uint16_t factor = (uint16_t) floor(cycleIndex);
+  factor = factor % (256*5);
+  
+  for(uint16_t i=0; i< NUM_LEDS; i++) {
+      c=Wheel(((i * 256 / NUM_LEDS) + factor) & 255);
+      leds[i].r = *c;
+      leds[i].g =  *(c+1);
+      leds[i].b =  *(c+2);
+    }
+
+  cycleIndex +=0.5;
+ 
+  
+}
+
+byte * LedsManager::Wheel(byte WheelPos) {
+  static byte c[3];
+  
+  if(WheelPos < 85) {
+   c[0]=WheelPos * 3;
+   c[1]=255 - WheelPos * 3;
+   c[2]=0;
+  } else if(WheelPos < 170) {
+   WheelPos -= 85;
+   c[0]=255 - WheelPos * 3;
+   c[1]=0;
+   c[2]=WheelPos * 3;
+  } else {
+   WheelPos -= 170;
+   c[0]=0;
+   c[1]=WheelPos * 3;
+   c[2]=255 - WheelPos * 3;
+  }
+
+  return c;
+}
+

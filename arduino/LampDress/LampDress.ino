@@ -42,8 +42,8 @@ TimerManager timer(&leds);
 
 void setup() {
 
-  fonaModule.setup();
   leds.setup();
+  fonaModule.setup();
   receiver.setup();
   timer.setup();
   
@@ -57,7 +57,7 @@ void loop() {
     
   if(fonaModule.isNewMessage()){
       timer.reset();
-      Serial.print("NEW MESSAGE RECEIVED: "); Serial.println(fonaModule.getCurrentMessage());
+      //Serial.print("NEW MESSAGE RECEIVED: "); Serial.println(fonaModule.getCurrentMessage());
       receiver.parseMessage(fonaModule.getCurrentMessage());   
   }
 

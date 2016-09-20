@@ -48,6 +48,7 @@ void ReceiveHandler::setCommands(const String& color, const String& pattern)
       Serial.print("Pattern: "); Serial.println(pattern);
       
       this->setColor(color);
+      this->ledsManager->nextPattern();
       this->setPattern(pattern);
 
 }
@@ -55,50 +56,51 @@ void ReceiveHandler::setCommands(const String& color, const String& pattern)
 void ReceiveHandler::setColor(const String& color)
 {
 
-      if(color == "green" || color == "Green" ){
+      if(color == "green" || color == "Green" || color == "Grün" || color == "grün" || color == "GRÜN"){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::DarkGreen);
       }
 
-      else if(color == "red" || color == "Red" ){
+      else if(color == "red" || color == "Red"  || color == "rot" || color == "Rot" || color == "ROT"){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::DarkRed);
       }
 
-      else if(color == "blue" || color == "Blue" ){
+      else if(color == "blue" || color == "Blue"  || color == "Blau" || color == "blau" || color == "BLAU"){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::DodgerBlue);
       }
 
-      else if(color == "blue" || color == "Blue" ){
-        Serial.print("Set Color: "); Serial.println(color);
-        this->ledsManager->setColor(CRGB::DodgerBlue);
-      }
-
-      else if(color == "yellow" || color == "Yellow" ){
+      else if(color == "yellow" || color == "Yellow"  || color == "Gelb" || color == "gelb" || color == "GELB"){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::Gold);
       }
 
-      else if(color == "purple" || color == "Purple" ){
+      else if(color == "purple" || color == "Purple"  || color == "Lila" || color == "lila" || color == "LILA"){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::MediumPurple);
       }
 
-      else if(color == "cyan" || color == "Cyan" ){
+      else if(color == "cyan" || color == "Cyan" || color == "CYAN" ){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::Cyan);
       }
 
-      else if(color == "orange" || color == "Orange" ){
+      else if(color == "orange" || color == "Orange" || color == "ORANGE"){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::DarkOrange);
       }
 
-      else if(color == "pink" || color == "Pink" ){
+      else if(color == "pink" || color == "Pink" || color == "PINK" ){
         Serial.print("Set Color: "); Serial.println(color);
         this->ledsManager->setColor(CRGB::DeepPink);
       }
+
+       else if(color == "white" || color == "White" || color == "weiß"  || color == "Weiß" || color == "WEIß"){
+        Serial.print("Set Pattern: "); Serial.println(color);
+        this->ledsManager->setColor(CRGB::White);
+      }
+
 
 }
 
