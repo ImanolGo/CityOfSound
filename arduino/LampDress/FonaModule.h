@@ -60,16 +60,6 @@ void FonaModule::setup()
 void FonaModule::initializeFona()
 {
     fona = new Adafruit_FONA(FONA_RST);
- 
-  
-  Serial.println(F("First trying 115200 baud"));
-  // start at 115200 baud
-  fonaSerial->begin(115200);
-  fona->begin(*fonaSerial);
-  
-  // restart with 4800 baud
-  fonaSerial->begin(4800);
-  Serial.println(F("Initializing @ 4800 baud..."));
   
     Serial.println(F("FONA SMS caller ID test"));
     Serial.println(F("Initializing....(May take 3 seconds)"));

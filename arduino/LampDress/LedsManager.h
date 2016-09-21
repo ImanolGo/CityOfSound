@@ -27,13 +27,14 @@ FASTLED_USING_NAMESPACE
 #define DATA_PIN 11
 #define CLOCK_PIN 10
 #define FRAMES_PER_SECOND  120
-#define NUM_PATTERNS  4
+#define NUM_PATTERNS  5
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 
 enum LED_PATTERNS {
   SOLID_GLITTER,
+  NOISE,
   JUGGLE,
   FADE,
   FLASH,
@@ -80,6 +81,8 @@ class LedsManager{
     void solidWithGlitter();
     void fade();
     void flash();
+    void noise();
+    void fillnoise8();
     void rainbowCycle() ;
     byte * Wheel(byte WheelPos);
     
@@ -92,6 +95,12 @@ class LedsManager{
     uint8_t flashAmount;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
     uint8_t fadeBrightness;
     float cycleIndex;
+    
+    uint16_t noise_speed; // a nice starting speed, mixes well with a scale of 100
+    uint16_t noise_scale;
+    uint16_t noise_x, noise_t;
+
+    uint8_t noise_array[NUM_LEDS]; // This is the array that we keep our computed noise values in
 
 };
 
@@ -107,6 +116,11 @@ void LedsManager::setup()
     gCurrentPatternNumber = RAINBOW; 
     gColor = CRGB::NavajoWhite;
     gHue = 0; 
+
+    noise_speed = 3; // a nice starting speed, mixes well with a scale of 100
+    noise_scale = 500;
+    noise_x = random16();
+    noise_t = random16();
 
     fadeAmount = 1;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
     flashAmount = 16; 
@@ -188,6 +202,9 @@ void LedsManager::runPattern()
           break;
         case SLOW_JUGGLE:
           slow_juggle();
+          break;
+        case NOISE:
+          noise();
           break;
           
         default: 
@@ -313,8 +330,6 @@ void LedsManager::slow_juggle()
    
 }
 
-
-
  
 void LedsManager::rainbowCycle() 
 {
@@ -329,7 +344,22 @@ void LedsManager::rainbowCycle()
       leds[i].b =  *(c+2);
     }
 
-  cycleIndex +=0.5;
+  cycleIndex +=0.25;
+ 
+}
+
+ 
+void LedsManager::noise() 
+{
+   
+  fillnoise8();
+  
+  for(uint16_t i=0; i< NUM_LEDS; i++) {
+      leds[i] = gColor;
+      leds[i].fadeLightBy(noise_array[i]);
+    }
+
+  cycleIndex +=0.25;
  
   
 }
@@ -355,4 +385,17 @@ byte * LedsManager::Wheel(byte WheelPos) {
 
   return c;
 }
+
+
+// Fill the x array of 8-bit noise values using the inoise8 function.
+void LedsManager::fillnoise8() {
+  for(int i = 0; i < NUM_LEDS; i++) 
+  {
+    int ioffset = noise_scale * i;
+    noise_array[i] = inoise8(noise_x + ioffset, noise_t );
+  }
+  
+  noise_t += noise_speed;
+}
+
 
