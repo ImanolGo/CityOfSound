@@ -54,7 +54,7 @@ private:
 void FonaModule::setup()
 {
     initializeFona();
-   // deleteAllSMS();
+    deleteAllSMS();
 }
 
 void FonaModule::initializeFona()
@@ -86,7 +86,10 @@ void FonaModule::initializeFona()
 void FonaModule::deleteAllSMS()
 {
     int8_t num = fona->getNumSMS();
-    for(int8_t i = 0; i < num; i++)
+    Serial.print("FONA Deleting "); Serial.print(num); Serial.println(" messages");
+    num = 30;
+    Serial.print("FONA Deleting "); Serial.print(num); Serial.println(" messages");
+    for(int8_t i = num; i > 0 ; i--)
     {
         fona->deleteSMS(i);
     }
@@ -136,7 +139,7 @@ void FonaModule::deleteAllSMS()
               Serial.println(F("Deleted Message"));
             } else {
               Serial.println(F("Couldn't delete"));
-              //deleteAllSMS();
+              deleteAllSMS();
             }
           }
      }
