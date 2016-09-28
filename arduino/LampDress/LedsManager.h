@@ -109,7 +109,7 @@ void LedsManager::setup()
     delay(1000); // 3 second delay for recovery
   
     FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5,2100); 
+    FastLED.setMaxPowerInVoltsAndMilliamps(5,200); 
     //FastLED.setBrightness(  BRIGHTNESS );
   
 

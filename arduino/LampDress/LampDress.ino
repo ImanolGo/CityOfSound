@@ -50,7 +50,6 @@ void setup() {
   fonaModule.setup();
   receiver.setup();
   timer.setup();
-  
 }
 
 

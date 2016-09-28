@@ -85,13 +85,9 @@ void FonaModule::initializeFona()
 
 void FonaModule::deleteAllSMS()
 {
-    int8_t num = fona->getNumSMS();
-    Serial.print("FONA Deleting "); Serial.print(num); Serial.println(" messages");
-    num = 30;
-    Serial.print("FONA Deleting "); Serial.print(num); Serial.println(" messages");
-    for(int8_t i = num; i > 0 ; i--)
+    if(fona->deleteAllSMS(4))
     {
-        fona->deleteSMS(i);
+      Serial.println("Deleting All SMS ");
     }
 }
  void FonaModule::update()
@@ -125,6 +121,7 @@ void FonaModule::deleteAllSMS()
               uint16_t smslen;
             if (! fona->readSMS(slot, smsbuffer, 250, &smslen)) { // pass in buffer and max len!
               Serial.println("Failed!");
+              deleteAllSMS();
             }
             else{
               Serial.print(F("***** SMS #")); Serial.print(slot);
