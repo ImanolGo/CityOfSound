@@ -22,7 +22,7 @@
 - 5V/2A supply should be able to drive 2 or more strands
 
 // LED strand GND/0V/-      <----> Adafruit Feather GND 
-// LED strand 5V/+          <---->  Adafruit Feather USB output  
+// LED strand 5V/+          <----> Adafruit Feather USB output  
 // LED strand MOSI/Data in  <----> Adafruit Feather SPI MOSI (GPIO #13)
 // LED strand SCLK/Clock    <----> Adafruit Feather SPI SCK  (GPIO #14) 
 */
