@@ -20,7 +20,7 @@ FASTLED_USING_NAMESPACE
 #endif
 
 
-#define NUM_LEDS    50
+#define NUM_LEDS    25
 #define BRIGHTNESS  84
 #define LED_TYPE    WS2801
 #define COLOR_ORDER RGB
@@ -108,7 +108,7 @@ void LedsManager::setup()
 {
     delay(1000); // 3 second delay for recovery
   
-    FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+    FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
     FastLED.setMaxPowerInVoltsAndMilliamps(5,1000); //Output limited to 5v 1000mA
     //FastLED.setBrightness(  BRIGHTNESS );
   

@@ -6,7 +6,7 @@
   A chain of individually adressable WS2801 LEDs is controlled by the Adafruit Feather and the Adafruit WS2801 library.
 
   This code is under A Creative Commons Attribution/Share-Alike License http://creativecommons.org/licenses/by-sa/4.0/
-   (2016) by Imanol Gomez
+   (2017) by Imanol Gomez
 
 /****************************************************
 
@@ -33,6 +33,8 @@
 #include "ReceiveHandler.h"
 #include "TimerManager.h"
 
+#define LED_PIN  13
+
 
 FonaModule fonaModule;
 LedsManager leds;
@@ -45,7 +47,16 @@ void setup() {
   //while (!Serial); //It get's stuck if not connected to a computer
   
   Serial.begin(115200);
-    
+   
+   // initialize digital pin LED_BUILTIN as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+  for(int i=0; i<3; i++){
+    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(200);                       // wait for a second
+    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+    delay(200); 
+  }
+
   leds.setup();
   fonaModule.setup();
   receiver.setup();
@@ -60,7 +71,7 @@ void loop() {
     
   if(fonaModule.isNewMessage()){
       timer.reset();
-      //Serial.print("NEW MESSAGE RECEIVED: "); Serial.println(fonaModule.getCurrentMessage());
+      Serial.print("NEW MESSAGE RECEIVED: "); Serial.println(fonaModule.getCurrentMessage());
       receiver.parseMessage(fonaModule.getCurrentMessage());   
   }
 

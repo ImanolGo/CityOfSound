@@ -16,9 +16,14 @@ I've used the Adafruit Feather FONA. It has  with GSM capabilities and is able t
 // LED strand MOSI/Data in  <----> Adafruit Feather SPI MOSI (GPIO #13)
 // LED strand SCLK/Clock    <----> Adafruit Feather SPI SCK  (GPIO #14) 
 
+The firmware of the Adafruit Feather 32u4 FONA (Figure 2), was developed using the Arduino platform, the Adafruit_FONA library and the FastLED library.
+
 ## Usage
 
-TODO: Write usage instructions
+1. Turn on the device. The dress will blink white once.
+2. Plug the power supply to the power socket or USB power bank.
+3. Send an SMS with “#color” to the number: +4915735983480
+4. Enjoy the new light pattern.
 
 ## Contributing
 

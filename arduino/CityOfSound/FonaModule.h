@@ -23,6 +23,7 @@
 
 
 
+
 class FonaModule{
 public:
   /// set all information necessary to use the module and initialize it
@@ -30,6 +31,7 @@ public:
 
   void initializeFona();
   void deleteAllSMS();
+  void startFona();
   
   void update();       ///< checks for sms notifications and gsm connectivity in a non-blocking way.
 
@@ -39,7 +41,11 @@ public:
   char fonaInBuffer[64];
   char smsbuffer[255];  // this is a large buffer for sms
 
-  SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
+  bool readBattPercent();
+
+  bool isAvailable();
+
+ SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
  SoftwareSerial *fonaSerial   = &fonaSS;
   
 private:
@@ -47,6 +53,7 @@ private:
     Adafruit_FONA* fona;  //Class controlling the GSM module
     bool newMessage;
     String currentMessage;
+    bool lipoOn;
     
 };
 
@@ -57,19 +64,34 @@ void FonaModule::setup()
     deleteAllSMS();
 }
 
+void FonaModule::startFona()
+{
+   // make it slow so its easy to read!
+    fonaSerial->begin(4800);
+    if (! fona->begin(*fonaSerial)) {
+      Serial.println(F("Couldn't find FONA"));
+      while(1);
+    }
+}
+
+
 void FonaModule::initializeFona()
 {
     fona = new Adafruit_FONA(FONA_RST);
   
     Serial.println(F("FONA SMS caller ID test"));
     Serial.println(F("Initializing....(May take 3 seconds)"));
+
+    startFona();
     
-    // make it slow so its easy to read!
-    fonaSerial->begin(4800);
-    if (! fona->begin(*fonaSerial)) {
-      Serial.println(F("Couldn't find FONA"));
-      while(1);
-    }
+//    while(!readBattPercent())
+//    {
+//      Serial.println(F("Attemtping to start FONA"));
+//      startFona();
+//    }
+//    
+
+    
     
     Serial.println(F("FONA is OK"));
     
@@ -83,6 +105,7 @@ void FonaModule::initializeFona()
     Serial.println("FONA Ready");
 }
 
+
 void FonaModule::deleteAllSMS()
 {
     if(fona->deleteAllSMS(4))
@@ -90,10 +113,25 @@ void FonaModule::deleteAllSMS()
       Serial.println("Deleting All SMS ");
     }
 }
+
+bool FonaModule::readBattPercent()
+{
+   // read the battery voltage and percentage
+        uint16_t vbat;
+        
+   if (! fona->getBattPercent(&vbat)) {
+          Serial.println(F("Failed to read Batt"));
+          return false;
+        } else {
+          Serial.print(F("VPct = ")); Serial.print(vbat); Serial.println(F("%"));
+          return true;
+        }
+}
+
  void FonaModule::update()
  {
      newMessage = false;
-   
+      //this->readBattPercent();
      if (fona->available())      //any data available from the FONA?
      {
         // this is a large buffer for sms
@@ -106,7 +144,7 @@ void FonaModule::deleteAllSMS()
            do  
            {
               *bufPtr = fona->read();
-              Serial.write(*bufPtr);
+              //Serial.write(*bufPtr);
               delay(1);
             } while ((*bufPtr++ != '\n') && (fona->available()) && (++charCount < (sizeof(fonaInBuffer)-1)));
     

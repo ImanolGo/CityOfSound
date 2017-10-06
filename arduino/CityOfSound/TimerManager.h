@@ -55,7 +55,7 @@ void TimerManager::update()
     
     if (elapsedTime > INTERVAL) 
     {   
-        Serial.print("Reset to default");
+        Serial.println("Reset to default");
         this->reset();
         this->ledsManager->setDefaultState();
     }
