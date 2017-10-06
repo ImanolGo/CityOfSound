@@ -1,4 +1,4 @@
-# Lamp Dress
+# City Of Sound
 
 This sketch shows how to remote control wearable LEDs using text messages.
 
